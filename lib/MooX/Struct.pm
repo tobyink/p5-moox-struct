@@ -118,7 +118,7 @@ BEGIN {
 	
 	sub process_attribute
 	{
-		my ($self, $klass, $name, $val) = @_;		
+		my ($self, $klass, $name, $val) = @_;
 		my $spec;
 		($name, $spec) = $self->process_spec($klass, $name, $val);
 		
