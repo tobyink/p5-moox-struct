@@ -10,18 +10,20 @@ BEGIN {
 	$MooX::Struct::VERSION   = '0.001';
 }
 
-use Moo             1.000000;
-use Object::ID      0         qw( object_id );
+use Moo         1.000000;
+use Object::ID  0         qw( object_id );
 
 BEGIN {
 	package MooX::Struct::Processor;
 	
-	use Moo             1.000000;
-	use Carp            0         qw( confess      );
-	use Data::OptList   0         qw(              );
-	use Sub::Install    0         qw( install_sub  );
-	use Scalar::Does    0         qw( does blessed );
-	
+	use Moo                  1.000000;
+	use Carp                 0         qw( confess      );
+	use Data::OptList        0         qw(              );
+	use Sub::Install         0         qw( install_sub  );
+	use Scalar::Does         0         qw( does blessed );
+	use namespace::clean               qw(              );
+	use B::Hooks::EndOfScope           qw( on_scope_end );
+
 	has flags => (
 		is       => 'ro',
 		isa      => does('HASH'),
@@ -72,7 +74,7 @@ BEGIN {
 	sub process_method
 	{
 		my ($self, $klass, $name, $coderef) = @_;
-		Sub::Install::install_sub {
+		install_sub {
 			into   => $klass,
 			as     => $name,
 			code   => $coderef,
@@ -165,7 +167,7 @@ BEGIN {
 	{
 		my $self = shift;
 		
-		while ($_[0] =~ /^-(.+)$/) {
+		while (@_ and $_[0] =~ /^-(.+)$/) {
 			$self->flags->{ lc($1) } = 1;
 		}
 		
@@ -175,12 +177,18 @@ BEGIN {
 			$details = [] unless defined $details;
 			
 			$self->class_map->{ $subname } = $self->make_sub($subname, $details);
-			Sub::Install::install_sub {
+			install_sub {
 				into   => $self->caller,
 				as     => $subname,
 				code   => $self->class_map->{ $subname },
 			};
 		}
+		on_scope_end {
+			namespace::clean->clean_subroutines(
+				$self->caller,
+				keys %{ $self->class_map },
+			);
+		};
 	}
 };
 
@@ -222,10 +230,12 @@ define all the structs as part of the C<use> statement. This means they
 happen at compile time.
 
 A struct is just an "anonymous" Moo class. MooX::Struct creates this class
-for you, and installs an alias for it in your namespace (like L<aliased>
-does). Thus your module can create a "Point3D" struct, and some other module
-can too, and they won't interfere with each other.
+for you, and installs a lexical alias for it in your namespace. Thus your
+module can create a "Point3D" struct, and some other module can too, and
+they won't interfere with each other.
 
+All struct classes inherit from MooX::Struct too; and MooX::Struct provides
+a useful method: C<object_id> (see L<Object::ID>).
 
 
 =head1 BUGS
