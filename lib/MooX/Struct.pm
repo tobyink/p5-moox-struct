@@ -60,6 +60,9 @@ BEGIN {
 	{
 		my ($self, $klass, $name, $val) = @_;
 		
+		confess("option '$name' unknown")
+			unless $name eq '-isa';
+		
 		my @parents = map {
 			exists $self->class_map->{$_}
 				? $self->class_map->{$_}->()
@@ -85,10 +88,9 @@ BEGIN {
 	sub process_spec
 	{
 		my ($self, $klass, $name, $val) = @_;
-		my $accessor_type = $self->flags->{rw} ? 'rw' : 'ro';
 		
 		my %spec = (
-			is => $accessor_type,
+			is => ($self->flags->{rw} ? 'rw' : 'ro'),
 			( does($val, 'ARRAY')
 				? @$val
 				: ( does($val,'HASH') ? %$val : () )
@@ -111,14 +113,14 @@ BEGIN {
 			$spec{isa} ||= sub { blessed($_[0]) or not ref($_[0]) };
 		}
 		
-		return \%spec;
+		return ($name, \%spec);
 	}
 	
 	sub process_attribute
 	{
-		my ($self, $klass, $name, $val) = @_;
-		
-		my $spec = $self->process_spec($klass, $name, $val);
+		my ($self, $klass, $name, $val) = @_;		
+		my $spec;
+		($name, $spec) = $self->process_spec($klass, $name, $val);
 		
 		Moo
 			->_constructor_maker_for($klass)
@@ -200,7 +202,6 @@ sub import
 }
 
 no Moo;
-
 1;
 
 __END__
@@ -216,7 +217,7 @@ MooX::Struct - make simple lightweight record-like structures that make sounds l
     Point3D => [ -isa => ['Point'], 'z' ],
  ;
  
- my $origin = Point3D->new(x => 0, y => 0, z => 0);
+ my $origin = Point3D->new( x => 0, y => 0, z => 0 );
 
 =head1 DESCRIPTION
 
