@@ -168,7 +168,7 @@ BEGIN {
 		my $self = shift;
 		
 		while (@_ and $_[0] =~ /^-(.+)$/) {
-			$self->flags->{ lc($1) } = 1;
+			$self->flags->{ lc($1) } = !!shift;
 		}
 		
 		foreach my $arg (@{ Data::OptList::mkopt(\@_) })
@@ -232,11 +232,81 @@ happen at compile time.
 A struct is just an "anonymous" Moo class. MooX::Struct creates this class
 for you, and installs a lexical alias for it in your namespace. Thus your
 module can create a "Point3D" struct, and some other module can too, and
-they won't interfere with each other.
+they won't interfere with each other. All struct classes inherit from
+MooX::Struct; and MooX::Struct provides a useful method: C<object_id> (see
+L<Object::ID>).
 
-All struct classes inherit from MooX::Struct too; and MooX::Struct provides
-a useful method: C<object_id> (see L<Object::ID>).
+Arguments for MooX::Struct are key-value pairs, where keys are the struct
+names, and values are arrayrefs.
 
+ use MooX::Struct
+    Person   => [qw/ name address /],
+    Company  => [qw/ name address registration_number /];
+
+The elements in the array are the attributes for the struct (which will be
+created as read-only attributes), however certain array elements are treated
+specially.
+
+=over
+
+=item *
+
+As per the example in the L</SYNOPSIS>, C<< -isa >> introduces a list of
+parent classes for the struct. If not specified, then classes inherit from
+MooX::Struct itself.
+
+Structs can inherit from other structs, or from normal classes. If inheriting
+from another struct, then you I<must> define both in the same C<use> statement.
+
+ # Not like this.
+ use MooX::Struct Point   => [ 'x', 'y' ];
+ use MooX::Struct Point3D => [ -isa => ['Point'], 'z' ];
+ 
+ # Like this.
+ use MooX::Struct
+    Point   => [ 'x', 'y' ],
+    Point3D => [ -isa => ['Point'], 'z' ],
+ ;
+
+=item *
+
+If an attribute name is followed by a coderef, this is installed as a
+method instead.
+
+ use MooX::Struct
+    Person => [
+       qw( name age sex ),
+       greet => sub {
+          my $self = shift;
+          CORE::say "Hello ", $self->name;
+       },
+    ];
+
+But if you're defining methods for your structs, then you've possibly missed
+the point of them.
+
+=item *
+
+If an attribute name is followed by an arrayref, these are used to set the
+options for the attribute. For example:
+
+ use MooX::Struct
+    Person  => [ name => [ is => 'ro', required => 1 ] ];
+
+=back
+
+Prior to the key-value list, some additional flags can be given. These begin
+with hyphens. Currently only one flag is supported, C<< -rw >> which indicates
+that attributes should be read-write rather than read-only.
+
+ use MooX::Struct -rw,
+    Person => [
+       qw( name age sex ),
+       greet => sub {
+          my $self = shift;
+          CORE::say "Hello ", $self->name;
+       },
+    ];
 
 =head1 BUGS
 
