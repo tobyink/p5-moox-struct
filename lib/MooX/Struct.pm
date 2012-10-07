@@ -242,7 +242,7 @@ BEGIN {
 		my ($self, $subname, $proto) = @_;
 		return sub ()
 		{
-			1 if $[ < 5.012; # bizarre, but necessary!
+			1 if $[ < 5.014; # bizarre, but necessary!
 			if (ref $proto)  # inflate!
 			{
 				my $klass = $self->create_class;
