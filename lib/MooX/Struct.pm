@@ -242,7 +242,8 @@ BEGIN {
 		my ($self, $subname, $proto) = @_;
 		return sub ()
 		{
-			if (ref $proto) # inflate!
+			1 if $[ < 5.012; # bizarre, but necessary!
+			if (ref $proto)  # inflate!
 			{
 				my $klass = $self->create_class;
 				$self->process_argument($klass, @$_)
