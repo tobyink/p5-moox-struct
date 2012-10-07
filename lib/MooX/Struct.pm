@@ -26,13 +26,13 @@ BEGIN {
 
 	has flags => (
 		is       => 'ro',
-		isa      => does('HASH'),
+		isa      => sub { die "flags must be HASH" unless does $_[0], 'HASH' },
 		default  => sub { +{} },
 	);
 	
 	has class_map => (
 		is       => 'ro',
-		isa      => does('HASH'),
+		isa      => sub { die "class_map must be HASH" unless does $_[0], 'HASH' },
 		default  => sub { +{} },
 	);
 	
