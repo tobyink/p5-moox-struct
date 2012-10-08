@@ -55,6 +55,33 @@ sub BUILDARGS
 	return $class->SUPER::BUILDARGS(@_);
 }
 
+my $done = 0;
+sub _data_printer
+{
+	require Data::Printer::Filter;
+	require Term::ANSIColor;
+	my $self   = shift;
+	
+	my @values = map { scalar Data::Printer::p($_) } @$self;
+
+	if (grep /\n/, @values)
+	{
+		return sprintf(
+			"%s[\n\t%s,\n]",
+			Term::ANSIColor::colored($self->TYPE, 'bright_yellow'),
+			join(qq[,\n\t], map { s/\n/\n\t/gm; $_ } @values),
+		);
+	}
+	else
+	{
+		return sprintf(
+			'%s[ %s ]',
+			Term::ANSIColor::colored($self->TYPE, 'bright_yellow'),
+			join(q[, ], @values),
+		);
+	}
+}
+
 BEGIN {
 	package MooX::Struct::Processor;
 	
@@ -555,6 +582,15 @@ Creates a shallow clone of the object.
 =item C<BUILDARGS>
 
 Moo internal fu.
+
+=item C<_data_printer>
+
+Automatic pretty printing with L<Data::Printer>.
+
+ use Data::Printer;
+ use MooX::Struct Point => [qw/ +x +y /];
+ my $origin = Point[];
+ p $origin;
 
 =back
 

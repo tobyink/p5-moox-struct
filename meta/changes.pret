@@ -39,4 +39,5 @@
 		item "New method 'CLONE'."^^Addition;
 		item "Provide Point[$x,$y] style constructor."^^Addition;
 		item "Overload a lot of operations on structs."^^Addition;
+		item "Special Data::Printer support."^^Addition;
 	].
