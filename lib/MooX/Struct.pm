@@ -13,6 +13,25 @@ BEGIN {
 use Moo         1.000000;
 use Object::ID  0         qw( object_id );
 
+use overload
+	q[""]      => 'TO_STRING',
+	q[0+]      => 'TO_STRING',
+	q[bool]    => sub { 1 },
+	q[@{}]     => 'TO_ARRAY',
+	q[=]       => 'CLONE',
+	fallback   => 1;
+
+METHODS: {
+	no warnings;
+	sub OBJECT_ID   { goto \&object_id };
+	sub FIELDS      { qw() };
+	sub TYPE        { +undef };
+	sub TO_ARRAY    {  [ map {;       $_[0]->$_ } $_[0]->FIELDS ] };
+	sub TO_HASH     { +{ map {; $_ => $_[0]->$_ } $_[0]->FIELDS } };
+	sub TO_STRING   { join q[ ], @{ $_[0]->TO_ARRAY } };
+	sub CLONE       { ref($_[0])->new($_[0]->TO_HASH) };
+};
+
 BEGIN {
 	package MooX::Struct::Processor;
 	
@@ -104,6 +123,8 @@ BEGIN {
 					join(q[ ] => @parents),
 				);
 			}
+			
+			return map { $_->can('FIELDS') ? $_->FIELDS : () } @parents;
 		}
 		else
 		{
@@ -221,9 +242,10 @@ BEGIN {
 		Moo
 			->_maybe_reset_handlemoose($klass);
 
-		return;
+		return $name;
 	}
 	
+	# returns a list of "fields" resulting from the argument
 	sub process_argument
 	{
 		my $self = shift;
@@ -245,9 +267,12 @@ BEGIN {
 			1 if $] < 5.014; # bizarre, but necessary!
 			if (ref $proto)  # inflate!
 			{
-				my $klass = $self->create_class;
-				$self->process_argument($klass, @$_)
-					for @{ Data::OptList::mkopt($proto) };
+				my $klass  = $self->create_class;
+				my @fields = map {
+					$self->process_argument($klass, @$_)
+				} @{ Data::OptList::mkopt($proto) };
+				$self->process_method($klass, FIELDS => sub { @fields });
+				$self->process_method($klass, TYPE   => sub { $subname });
 				$proto = $klass;
 			}
 			return $proto;
@@ -323,8 +348,7 @@ A struct is just an "anonymous" Moo class. MooX::Struct creates this class
 for you, and installs a lexical alias for it in your namespace. Thus your
 module can create a "Point3D" struct, and some other module can too, and
 they won't interfere with each other. All struct classes inherit from
-MooX::Struct; and MooX::Struct provides a useful method: C<object_id> (see
-L<Object::ID>).
+MooX::Struct.
 
 Arguments for MooX::Struct are key-value pairs, where keys are the struct
 names, and values are arrayrefs.
@@ -347,6 +371,7 @@ MooX::Struct itself.
 
 Structs can inherit from other structs, or from normal classes. If inheriting
 from another struct, then you I<must> define both in the same C<use> statement.
+Inheriting from a non-struct class is discouraged.
 
  # Not like this.
  use MooX::Struct Point   => [ 'x', 'y' ];
@@ -417,6 +442,64 @@ read-write rather than read-only.
     ];
 
 Flags C<< -trace >> and C<< -deparse >> may be of use debugging.
+
+=head2 Methods
+
+Structs are objects and thus have methods. The following methods are defined:
+
+=over
+
+=item C<OBJECT_ID> 
+
+Returns a unique identifier for the object.
+
+=item C<FIELDS> 
+
+Returns a list of fields associated with the object. For the C<Point3D> struct
+in the SYNPOSIS, this would be <c>'x', 'y', 'z'</c>.
+
+=item C<TYPE>
+
+Returns the type name of the struct, e.g. <c>'Point3D'</c>.
+
+=item C<TO_HASH>
+
+Returns a reference to an unblessed hash where the object's fields are the
+keys and the object's values are the hash values.
+
+=item C<TO_ARRAY>
+
+Returns a reference to an unblessed array where the object's values are the
+array items, in the same order as listed by C<FIELDS>.
+
+=item C<TO_STRING>
+
+Joins C<TO_ARRAY> with whitespace. This is not necessarily a brilliant
+stringification, but easy enough to overload:
+
+ use MooX::Struct
+    Point => [
+       qw( x y ),
+       TO_STRING => sub {
+          sprintf "(%d, %d)"), $_[0]->x, $_[0]->y;
+       },
+    ]
+ ;
+
+=item C<CLONE>
+
+Creates a shallow clone of the object. 
+
+=back
+
+With the exception of C<FIELDS> and C<TYPE>, any of these can be overridden
+using the standard way of specifying methods for structs.
+
+=head2 Overloading
+
+MooX::Struct overloads stringification, numification and array dereferencing.
+Objects always evaluate to true in a boolean context. (Even if they numify to
+0 or stringify to the empty string.)
 
 =head1 BUGS
 
