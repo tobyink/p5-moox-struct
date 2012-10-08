@@ -55,6 +55,8 @@ sub BUILDARGS
 	return $class->SUPER::BUILDARGS(@_);
 }
 
+# This could do with some improvement from a Data::Printer expert.
+#
 my $done = 0;
 sub _data_printer
 {
@@ -542,14 +544,14 @@ Returns a unique identifier for the object.
 =item C<FIELDS> 
 
 Returns a list of fields associated with the object. For the C<Point3D> struct
-in the SYNPOSIS, this would be <c>'x', 'y', 'z'</c>.
+in the SYNPOSIS, this would be C<< 'x', 'y', 'z' >>.
 
 The order the fields are returned in is equal to the order they must be supplied
 for the positional constructor.
 
 =item C<TYPE>
 
-Returns the type name of the struct, e.g. <c>'Point3D'</c>.
+Returns the type name of the struct, e.g. C<< 'Point3D' >>.
 
 =item C<TO_HASH>
 
