@@ -10,8 +10,9 @@ BEGIN {
 	$MooX::Struct::VERSION   = '0.004';
 }
 
-use Moo         1.000000;
-use Object::ID  0         qw( object_id );
+use Moo          1.000000;
+use Object::ID   0         qw( object_id );
+use Scalar::Does 0         qw( does );
 
 use overload
 	q[""]      => 'TO_STRING',
@@ -29,20 +30,45 @@ METHODS: {
 	sub TO_ARRAY    {  [ map {;       $_[0]->$_ } $_[0]->FIELDS ] };
 	sub TO_HASH     { +{ map {; $_ => $_[0]->$_ } $_[0]->FIELDS } };
 	sub TO_STRING   { join q[ ], @{ $_[0]->TO_ARRAY } };
-	sub CLONE       { ref($_[0])->new($_[0]->TO_HASH) };
+	sub CLONE       { my $s = shift; ref($s)->new(%{$s->TO_HASH}, @_) };
 };
+
+sub BUILDARGS
+{
+	my $class = shift;
+	if (
+		@_ == 1                 and
+		does($_[0], 'ARRAY')    and
+		not does($_[0], 'HASH')
+	)
+	{
+		my @fields = $class->FIELDS;
+		my @values = @{ $_[0] };
+		Carp::confess("too many values passed to constructor (expected @fields); stopped")
+			unless @fields >= @values;
+		no warnings;
+		return +{
+			map {
+				$fields[$_] => $values[$_];
+			} 0 .. $#values
+		}
+	}
+	return $class->SUPER::BUILDARGS(@_);
+}
 
 BEGIN {
 	package MooX::Struct::Processor;
+	
+	sub _uniq { my %seen; grep { not $seen{$_}++ } @_ };
 	
 	use Moo                  1.000000;
 	use Carp                 0         qw( confess      );
 	use Data::OptList        0         qw(              );
 	use Sub::Install         0         qw( install_sub  );
-	use Scalar::Does         0         qw( does blessed );
+	use Scalar::Does         0         qw( does blessed looks_like_number );
 	use namespace::clean               qw(              );
 	use B::Hooks::EndOfScope           qw( on_scope_end );
-
+	
 	has flags => (
 		is       => 'ro',
 		isa      => sub { die "flags must be HASH" unless does $_[0], 'HASH' },
@@ -74,7 +100,7 @@ BEGIN {
 		$ENV{PERL_MOOX_STRUCT_TRACE}
 		or shift->flags->{trace};
 	}
-
+	
 	has trace_handle => (
 		is       => 'lazy',
 	);
@@ -84,7 +110,7 @@ BEGIN {
 		require IO::Handle;
 		\*STDERR;
 	}
-
+	
 	my $counter = 0;
 	sub create_class
 	{
@@ -193,6 +219,15 @@ BEGIN {
 					unless does($_[0], 'HASH');
 			};
 		}
+		elsif ($name =~ /^\+(.+)/)
+		{
+			$name = $1;
+			$spec{isa} ||= sub {
+				die "wrong type for '$name' (not number)"
+					unless looks_like_number($_[0]);
+			};
+			$spec{default} ||= sub { 0 } unless $spec{required};
+		}
 		elsif ($name =~ /^\$(.+)/)
 		{
 			$name = $1;
@@ -230,7 +265,7 @@ BEGIN {
 				$self->trace_handle->printf("$code\n");
 			}
 		}
-
+		
 		Moo
 			->_constructor_maker_for($klass)
 			->register_attribute_specs($name, $spec);
@@ -241,7 +276,7 @@ BEGIN {
 			
 		Moo
 			->_maybe_reset_handlemoose($klass);
-
+		
 		return $name;
 	}
 	
@@ -262,19 +297,20 @@ BEGIN {
 	sub make_sub
 	{
 		my ($self, $subname, $proto) = @_;
-		return sub ()
+		return sub (;$)
 		{
 			1 if $] < 5.014; # bizarre, but necessary!
 			if (ref $proto)  # inflate!
 			{
 				my $klass  = $self->create_class;
-				my @fields = map {
+				my @fields = _uniq map {
 					$self->process_argument($klass, @$_)
 				} @{ Data::OptList::mkopt($proto) };
 				$self->process_method($klass, FIELDS => sub { @fields });
 				$self->process_method($klass, TYPE   => sub { $subname });
 				$proto = $klass;
 			}
+			return $proto->new(@_) if @_;
 			return $proto;
 		}
 	}
@@ -332,6 +368,9 @@ MooX::Struct - make simple lightweight record-like structures that make sounds l
  ;
  
  my $origin = Point3D->new( x => 0, y => 0, z => 0 );
+ 
+ # or...
+ my $origin = Point3D[ 0, 0, 0 ];
 
 =head1 DESCRIPTION
 
@@ -415,7 +454,9 @@ sigils of C<< @ >> and C<< % >> specify that the attribute isa arrayref or
 hashref respectively. (Blessed arrayrefs and hashrefs are accepted; as are
 objects which overload C<< @{} >> and C<< %{} >>.) The prefix sigil C<< $ >>
 specifies that the attribute value must not be an unblessed arrayref or hashref.
-The postfix sigil C<< ! >> specifies that the attribute is required.
+The prefix sigil C<< + >> indicates the attribute is a number, and provides
+a default value of 0, unless the attribute is required. The postfix sigil
+C<< ! >> specifies that the attribute is required.
 
  use MooX::Struct
     Person  => [qw( $name! @children )];
@@ -443,6 +484,25 @@ read-write rather than read-only.
 
 Flags C<< -trace >> and C<< -deparse >> may be of use debugging.
 
+=head2 Instantiating Structs
+
+There are two supported methods of instatiating structs. You can use a
+traditional class-like constructor with named parameters:
+
+ my $point = Point->new( x => 1, y => 2 );
+
+Or you can use the abbreviated syntax with positional parameters:
+
+ my $point = Point[ 1, 2 ];
+
+If you know about Moo and peek around in the source code for this module,
+then I'm sure you can figure out additional ways to instantiate them, but
+the above are the only supported two.
+
+When inheritance has been used, it might not always be clear what order
+the positional parameters come in (though see the documentation for the
+C<FIELDS> below), so the traditional class-like style may be preferred.
+
 =head2 Methods
 
 Structs are objects and thus have methods. The following methods are defined:
@@ -457,6 +517,9 @@ Returns a unique identifier for the object.
 
 Returns a list of fields associated with the object. For the C<Point3D> struct
 in the SYNPOSIS, this would be <c>'x', 'y', 'z'</c>.
+
+The order the fields are returned in is equal to the order they must be supplied
+for the positional constructor.
 
 =item C<TYPE>
 
@@ -489,6 +552,10 @@ stringification, but easy enough to overload:
 =item C<CLONE>
 
 Creates a shallow clone of the object. 
+
+=item C<BUILDARGS>
+
+Moo internal fu.
 
 =back
 

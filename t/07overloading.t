@@ -12,4 +12,7 @@ is("$point2", "3 4 5", "Point3D stringifies correctly");
 
 is_deeply( [ @$point2 ], [qw(3 4 5)], "Point3D casts to array properly" );
 
+my $clone = CLONE $point2;
+is("$clone", "3 4 5", "cloning is awesome");
+
 done_testing;
