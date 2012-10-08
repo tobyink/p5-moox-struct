@@ -16,7 +16,6 @@ use Scalar::Does 0         qw( does );
 
 use overload
 	q[""]      => 'TO_STRING',
-	q[0+]      => 'TO_STRING',
 	q[bool]    => sub { 1 },
 	q[@{}]     => 'TO_ARRAY',
 	q[=]       => 'CLONE',
@@ -564,9 +563,9 @@ using the standard way of specifying methods for structs.
 
 =head2 Overloading
 
-MooX::Struct overloads stringification, numification and array dereferencing.
-Objects always evaluate to true in a boolean context. (Even if they numify to
-0 or stringify to the empty string.)
+MooX::Struct overloads stringification and array dereferencing. Objects always
+evaluate to true in a boolean context. (Even if they stringify to the empty
+string.)
 
 =head1 BUGS
 
