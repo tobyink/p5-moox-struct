@@ -49,4 +49,5 @@
 		item "Bundle MooX::Struct::Util."^^Addition;
 		item "Allow structs to consume roles using '-with' option."^^Addition;		
 		item "Constructor is now strict; it will croak if passed hash keys it doesn't recognise."^^Change;
+		item "New experimental method 'EXTEND'."^^Addition;
 	].

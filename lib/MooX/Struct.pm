@@ -66,6 +66,28 @@ sub BUILDARGS
 	return $hashref;
 }
 
+sub EXTEND
+{
+	my ($invocant, @args) = @_;
+	my $base = ref($invocant) || $invocant;
+	
+	my $processor = 'MooX::Struct::Processor'->new;
+	while (@args and $args[0] =~ /^-(.+)$/) {
+		$processor->flags->{ lc($1) } = !!shift;
+	}
+
+	my $subname = undef;
+	$subname = ${ shift @args } if ref($args[0]) eq 'SCALAR';	
+
+	my $new_class = $processor->make_sub(
+		$subname,
+		[ -extends => [$base], @args ],
+	)->();
+	return $new_class unless ref $invocant;
+	
+	bless $invocant => $new_class;
+}
+
 # This could do with some improvement from a Data::Printer expert.
 #
 my $done = 0;
@@ -81,7 +103,7 @@ sub _data_printer
 	{
 		return sprintf(
 			"%s[\n\t%s,\n]",
-			Term::ANSIColor::colored($self->TYPE, 'bright_yellow'),
+			Term::ANSIColor::colored($self->TYPE||'struct', 'bright_yellow'),
 			join(qq[,\n\t], map { s/\n/\n\t/gm; $_ } @values),
 		);
 	}
@@ -89,7 +111,7 @@ sub _data_printer
 	{
 		return sprintf(
 			'%s[ %s ]',
-			Term::ANSIColor::colored($self->TYPE, 'bright_yellow'),
+			Term::ANSIColor::colored($self->TYPE||'struct', 'bright_yellow'),
 			join(q[, ], @values),
 		);
 	}
@@ -123,11 +145,6 @@ BEGIN {
 	has base => (
 		is       => 'ro',
 		default  => sub { 'MooX::Struct' },
-	);
-	
-	has 'caller' => (
-		is       => 'ro',
-		required => 1,
 	);
 	
 	has trace => (
@@ -365,7 +382,7 @@ BEGIN {
 					$self->process_argument($klass, @$_)
 				} @{ Data::OptList::mkopt($proto) };
 				$self->process_method($klass, FIELDS => sub { @fields });
-				$self->process_method($klass, TYPE   => sub { $subname });
+				$self->process_method($klass, TYPE   => sub { $subname }) if defined $subname;
 				$proto = $klass;
 			}
 			return $proto->new(@_) if @_;
@@ -375,7 +392,8 @@ BEGIN {
 	
 	sub process
 	{
-		my $self = shift;
+		my $self   = shift;
+		my $caller = shift;
 		
 		while (@_ and $_[0] =~ /^-(.+)$/) {
 			$self->flags->{ lc($1) } = !!shift;
@@ -388,14 +406,14 @@ BEGIN {
 			
 			$self->class_map->{ $subname } = $self->make_sub($subname, $details);
 			install_sub {
-				into   => $self->caller,
+				into   => $caller,
 				as     => $subname,
 				code   => $self->class_map->{ $subname },
 			};
 		}
 		on_scope_end {
 			namespace::clean->clean_subroutines(
-				$self->caller,
+				$caller,
 				keys %{ $self->class_map },
 			);
 		};
@@ -406,7 +424,7 @@ sub import
 {
 	my $caller = caller;
 	my $class  = shift;
-	"$class\::Processor"->new(caller => scalar caller)->process(@_);
+	"$class\::Processor"->new->process($caller, @_);
 }
 
 no Moo;
@@ -616,6 +634,34 @@ stringification, but easy enough to overload:
 =item C<CLONE>
 
 Creates a shallow clone of the object. 
+
+=item C<EXTEND>
+
+An exverimental feature.
+
+Extend a class or object with additional attributes, methods, etc. This method
+takes almost all the same arguments as C<use MooX::Struct>, albeit with some
+slight differences.
+
+ use MooX::Struct Point => [qw/ +x +y /];
+ my $point = Point[2, 3];
+ $point->EXTEND(-rw, q/+z/);  # extend an object
+ $point->can('z');   # true
+ 
+ my $new_class = Point->EXTEND('+z');  # extend a class
+ my $point_3d  = $new_class->new( x => 1, y => 2, z => 3 );
+ $point_3d->TYPE;  # Point !
+ 
+ my $point_4d = $new_class->EXTEND(\"Point4D", '+t');
+ $point_4d->TYPE;  # Point4D
+ 
+ my $origin = Point[]->EXTEND(-with => [qw/ Math::Role::Origin /]);
+
+This feature has been included mostly because it's easy to implement on top
+of the existing code for processing C<use MooX::Struct>. Some subsets of
+this functionality are sane, such as the ability to add traits to an object.
+Others (like the ability to add a new uninitialized, read-only attribute to
+an existing object) are less sensible.
 
 =item C<BUILDARGS>
 
