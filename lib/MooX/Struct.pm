@@ -361,9 +361,6 @@ BEGIN {
 		my $self = shift;
 		my ($klass, $name, $val) = @_;
 		
-		confess("attribute '$name' seems to private")
-			if $name =~ /^___/; # these are reserved for now!
-		
 		return $self->process_meta(@_)      if $name =~ /^-/;
 		return $self->process_method(@_)    if does($val, 'CODE');
 		return $self->process_attribute(@_);
@@ -587,7 +584,15 @@ C<FIELDS> below), so the traditional class-like style may be preferred.
 
 =head2 Methods
 
-Structs are objects and thus have methods. The following methods are defined:
+Structs are objects and thus have methods. You can define your own methods
+as described above. MooX::Struct's built-in methods will always obey the
+convention of being in ALL CAPS (except in the case of C<_data_printer>).
+By using lower-case letters to name your own methods, you can avoid
+naming collisions.
+
+The following methods are currently defined. Additionally all the standard
+Perl (C<isa>, C<can>, etc) and Moo (C<new>, C<does>, etc) methods are
+available.
 
 =over
 
