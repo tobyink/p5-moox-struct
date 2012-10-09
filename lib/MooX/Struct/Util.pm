@@ -32,6 +32,12 @@ MooX::Struct::Util - extensions for MooX::Struct that would have been overkill t
 
 =head1 LAZY DEFAULTS
 
+=begin trustme
+
+=item lazy_default
+
+=end trustme
+
 Sugar for lazily defaulted attributes. The following two are effectively
 the same.
 
