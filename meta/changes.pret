@@ -50,4 +50,5 @@
 		item "Allow structs to consume roles using '-with' option."^^Addition;		
 		item "Constructor is now strict; it will croak if passed hash keys it doesn't recognise."^^Change;
 		item "New experimental method 'EXTEND'."^^Addition;
+		item "Dropped 'object_id' alias for 'OBJECT_ID'."^^Removal;
 	].

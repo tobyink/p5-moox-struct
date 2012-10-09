@@ -11,7 +11,7 @@ BEGIN {
 }
 
 use Moo          1.000000;
-use Object::ID   0         qw( object_id );
+use Object::ID   0         qw(      );
 use Scalar::Does 0         qw( does );
 
 use overload
@@ -23,7 +23,7 @@ use overload
 
 METHODS: {
 	no warnings;
-	sub OBJECT_ID   { goto \&object_id };
+	sub OBJECT_ID   { goto \&Object::ID::object_id };
 	sub FIELDS      { qw() };
 	sub TYPE        { +undef };
 	sub TO_ARRAY    {  [ map {;       $_[0]->$_ } $_[0]->FIELDS ] };
