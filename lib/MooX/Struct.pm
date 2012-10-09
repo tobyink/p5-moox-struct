@@ -55,6 +55,14 @@ sub BUILDARGS
 	}
 	
 	my $hashref = $class->SUPER::BUILDARGS(@_);
+	
+	my %tmp = map { $_ => 1 } keys %$hashref;
+	delete $tmp{$_} for @fields;
+	if (my @unknown = sort keys %tmp)
+	{
+		Carp::confess("unknown keys passed to constructor (@unknown); stopped");
+	}
+	
 	return $hashref;
 }
 
