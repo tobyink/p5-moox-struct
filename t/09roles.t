@@ -24,4 +24,10 @@ is_deeply(
 	[ qw/ attr2 attr1 attr3 attr4 / ],
 );
 
+my $thingy = Thingy[qw/ 2 1 3 4 /];
+is($thingy->attr1, 1);
+is($thingy->attr2, 2);
+is($thingy->attr3, 3);
+is($thingy->attr4, 4);
+
 done_testing;
