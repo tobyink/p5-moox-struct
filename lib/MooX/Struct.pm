@@ -77,7 +77,7 @@ sub EXTEND
 	}
 
 	my $subname = undef;
-	$subname = ${ shift @args } if ref($args[0]) eq 'SCALAR';	
+	$subname = ${ shift @args } if ref($args[0]) eq 'SCALAR';
 
 	my $new_class = $processor->make_sub(
 		$subname,
