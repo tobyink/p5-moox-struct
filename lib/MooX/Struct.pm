@@ -648,7 +648,7 @@ L<http://rt.cpan.org/Dist/Display.html?Queue=MooX-Struct>.
 
 =head1 SEE ALSO
 
-L<Moo>, L<MooseX::Struct>, L<Class::Struct>.
+L<Moo>, L<MooX::Struct::Util>, L<MooseX::Struct>, L<Class::Struct>.
 
 =head1 AUTHOR
 
