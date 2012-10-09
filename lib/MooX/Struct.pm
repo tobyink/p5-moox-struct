@@ -34,14 +34,15 @@ METHODS: {
 
 sub BUILDARGS
 {
-	my $class = shift;
+	my $class  = shift;
+	my @fields = $class->FIELDS;
+	
 	if (
 		@_ == 1                 and
 		does($_[0], 'ARRAY')    and
 		not does($_[0], 'HASH')
 	)
 	{
-		my @fields = $class->FIELDS;
 		my @values = @{ $_[0] };
 		Carp::confess("too many values passed to constructor (expected @fields); stopped")
 			unless @fields >= @values;
@@ -52,7 +53,9 @@ sub BUILDARGS
 			} 0 .. $#values
 		}
 	}
-	return $class->SUPER::BUILDARGS(@_);
+	
+	my $hashref = $class->SUPER::BUILDARGS(@_);
+	return $hashref;
 }
 
 # This could do with some improvement from a Data::Printer expert.
@@ -179,6 +182,25 @@ BEGIN {
 			}
 			
 			return map { $_->can('FIELDS') ? $_->FIELDS : () } @parents;
+		}
+		elsif ($name eq '-with')
+		{
+			require Moo::Role;
+			Moo::Role->apply_roles_to_package($klass, @$val);
+			Moo->_maybe_reset_handlemoose($klass);
+			
+			if ($self->trace)
+			{
+				$self->trace_handle->printf(
+					"with qw(%s)\n",
+					join(q[ ] => @$val),
+				);
+			}
+			
+			return map {
+				my $role = $_;
+				grep { not ref $_ } @{ $Moo::Role::INFO{$role}{attributes} }
+			} @$val;
 		}
 		else
 		{
@@ -452,6 +474,10 @@ Inheriting from a non-struct class is discouraged.
 
 =item *
 
+Similarly C<< -with >> consumes a list of roles.
+
+=item *
+
 If an attribute name is followed by a coderef, this is installed as a
 method instead.
 
@@ -527,8 +553,8 @@ If you know about Moo and peek around in the source code for this module,
 then I'm sure you can figure out additional ways to instantiate them, but
 the above are the only supported two.
 
-When inheritance has been used, it might not always be clear what order
-the positional parameters come in (though see the documentation for the
+When inheritance or roles have been used, it might not always be clear what
+order the positional parameters come in (though see the documentation for the
 C<FIELDS> below), so the traditional class-like style may be preferred.
 
 =head2 Methods
