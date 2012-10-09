@@ -509,6 +509,8 @@ options for the attribute. For example:
  use MooX::Struct
     Person  => [ name => [ is => 'ro', required => 1 ] ];
 
+Using the C<init_arg> option would probably break stuff. Don't do that.
+
 =item *
 
 Attribute names may be "decorated" with prefix and postfix "sigils". The prefix
