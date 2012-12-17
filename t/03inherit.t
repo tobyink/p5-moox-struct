@@ -1,9 +1,9 @@
 use strict;
-use Test::More tests => 20;
+use Test::More tests => 24;
 use MooX::Struct
-	Agent        => [ name => undef ],
+	Agent        => [ name => undef, -class => \'Local::Test::Class1' ],
 	Organisation => [ -extends => ['Agent'], employees => undef, company_number => [is => 'rw']],
-	Person       => [ -extends => ['Agent'] ];
+	Person       => [ -extends => ['Agent'], -class => [qw/Local Test Class2/] ];
 
 my $alice = Person->new(name => 'Alice');
 my $bob   = Person->new(name => 'Bob');
@@ -12,6 +12,11 @@ my $acme  = Organisation->new(name => 'ACME', employees => [$alice, $bob]);
 note sprintf("Agent class:         %s", Agent);
 note sprintf("Person class:        %s", Person);
 note sprintf("Organisation class:  %s", Organisation);
+
+is(Agent, 'Local::Test::Class1');
+is(Person, 'Local::Test::Class2');
+isa_ok($alice, 'Local::Test::Class1');
+isa_ok($alice, 'Local::Test::Class2');
 
 is(
 	ref($alice),
