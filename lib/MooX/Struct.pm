@@ -392,9 +392,13 @@ BEGIN {
 			{
 				my $opts   = Data::OptList::mkopt($proto);
 				my $klass  = $self->create_class($opts);
+				my $seen_extends;
 				my @fields = _uniq map {
-					$self->process_argument($klass, @$_)
+					++$seen_extends if $_->[0] =~ /^-(?:extends|isa)$/;
+					$self->process_argument($klass, @$_);
 				} @$opts;
+				unshift @fields, $self->base->FIELDS
+					if !$seen_extends && $self->base->can('FIELDS');
 				$self->process_method($klass, FIELDS => sub { @fields });
 				$self->process_method($klass, TYPE   => sub { $subname }) if defined $subname;
 				$proto = $klass;
