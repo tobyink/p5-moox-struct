@@ -71,4 +71,6 @@
 	changeset [
 		item "Fix an internal issue in MooX::Struct::Processor, whereby it would ignore attributes inherited from the default base class when building the FIELDS method."^^Bugfix;
 		item "Moar test cases."^^Packaging;
+		item "Moo-style constructor is no longer strict. (This may change back!)"^^Change;
+		item "Attributes inherited from roles are no longer included in FIELDS."^^Change;
 	].
