@@ -1,21 +1,19 @@
 use strict;
 use warnings;
 
-use Test::More (
-	$] < 5.010
-		? (skip_all => 'need Perl 5.10')
-		: ()
-);
+use if ($] < 5.010), 'Test::More', skip_all => 'need Perl 5.10';
+use Test::More;
 
 use 5.010;
-use Test::More;
 use MooX::Struct ();
 use IO::Handle;
+
+my $default = "MooX::Struct::Processor"->new(trace => 1);
+is($default->trace_handle, \*STDERR);
 
 my $output;
 open my $handle, '>', \$output;
 my $proc = "MooX::Struct::Processor"->new(trace => 1, trace_handle => $handle);
-
 
 $proc->process(
 	__PACKAGE__,
@@ -48,6 +46,7 @@ $proc->process(
 		-isa         => [Something()],
 		-with        => ['Local::Role'],
 		announce_foo => sub { my $self = shift; print $self->foo, "\n" },
+		'+number', 'random',
 	],
 );
 
@@ -56,5 +55,12 @@ $obj = new_ok SomethingElse(), [[1]];
 like($output, qr{package Something::Else});
 like($output, qr{with qw.Local::Role.});
 like($output, qr{print \$self->foo});
+like($output, qr{looks_like_number});
+
+{
+	local $ENV{PERL_MOOX_STRUCT_TRACE} = 1;
+	ok "MooX::Struct::Processor"->new->trace;
+}
+ok not "MooX::Struct::Processor"->new->trace;
 
 done_testing;

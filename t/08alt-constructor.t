@@ -29,4 +29,38 @@ is("$point1", "3 4");
 is("$point2", "3 4 5");
 is("$point3", "3 4 0");
 
+is(
+	Point3D->new([3, 4, 5])->TO_STRING,
+	"3 4 5",
+);
+
+is(
+	Point3D->new({ z=>1, y=>2, x=>3, y=>4, z=>5 })->TO_STRING,
+	"3 4 5",
+);
+
+ok not eval {
+	Point3D->new( \*STDERR )
+};
+
+ok not eval {
+	Point3D[1, 2, 3, 4]
+};
+
+{
+	package Local::WeirdHash;
+	use overload '@{}' => 'TO_ARRAY';
+	sub TO_ARRAY {
+		my $self = shift;
+		[ sort keys %$self ];
+	}
+}
+
+my $weird = bless { z=>1, y=>2, x=>3, y=>4, z=>5 }, 'Local::WeirdHash';
+is(
+	Point3D->new($weird)->TO_STRING,
+	"3 4 5",
+	'if constructed with an object that "does" array and hash, hash is preferred',
+);
+
 done_testing();

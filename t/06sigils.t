@@ -18,13 +18,18 @@ the same terms as the Perl 5 programming language system itself.
 =cut
 
 use Test::More;
-use Scalar::Does;
+use Scalar::Does qw( does looks_like_number );
 use MooX::Struct
 	Structure => [
 		qw( $value %dict @list ),
-		'%list2' => [ isa => sub { die unless does $_[0], 'ARRAY' } ],
+		'@value2' => { isa => sub { die if ref $_[0] } },
+		'%list2'  => [ isa => sub { die unless does $_[0], 'ARRAY' } ],
+		'$dict2'  => [ isa => sub { die unless does $_[0], 'HASH' } ],
 	],
 	OtherStructure => [qw( id! ego )],
+	Point    => ['+x', '+y' => [default => sub { 101 }]],
+	Point3D  => [-extends => ['Point'], '+z' => [isa => sub { die unless looks_like_number($_[0]) || !defined $_[0] }]],
+	PointReq => ['+x!', '+y!'],
 ;
 
 ok eval {
@@ -44,7 +49,15 @@ ok eval {
 };
 
 ok eval {
+	Structure->new( value2 => "Hello World" );
+};
+
+ok eval {
 	Structure->new( list2 => [] );
+};
+
+ok eval {
+	Structure->new( dict2 => {foo => 42} );
 };
 
 ok !eval {
@@ -64,7 +77,15 @@ ok !eval {
 };
 
 ok !eval {
+	Structure->new( value2 => [] );
+};
+
+ok !eval {
 	Structure->new( list2 => +{} );
+};
+
+ok !eval {
+	Structure->new( dict2 => 42 );
 };
 
 ok eval {
@@ -73,6 +94,60 @@ ok eval {
 
 ok !eval {
 	OtherStructure->new(ego => undef);
+};
+
+my $point = Point->new;
+ok defined $point->x;
+ok defined $point->y;
+is($point->x, 0);
+is($point->y, 101);
+
+ok eval {
+	Point[ 42, 42 ];
+	Point[ 42.1, 42.2 ];
+	Point[ "99", "999" ];
+	Point[ "+Inf", "-Inf" ];
+};
+
+ok not eval {
+	Point[ "Hello", "World" ];
+};
+
+ok not eval {
+	Point[ "", "" ];
+};
+
+ok not eval {
+	Point[ "Hello", "99" ];
+};
+
+ok eval {
+	Point3D[ 1, 2 ];
+	Point3D[ 1, 2, 3 ];
+	Point3D[ 1, 2, undef ];
+};
+
+is_deeply(
+	Point3D->new->TO_ARRAY,
+	[ 0, 101, 0 ],
+);
+
+ok not eval {
+	Point3D[ 1, 2, "Hello" ];
+};
+
+ok eval {
+	PointReq[ 1, 2 ];
+	PointReq[ 0, '-Inf' ];
+	PointReq[ 0, 0 ];
+};
+
+ok not eval {
+	PointReq[ ];
+};
+
+ok not eval {
+	PointReq[ "abc", 0 ];
 };
 
 done_testing();

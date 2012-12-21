@@ -53,7 +53,13 @@ sub BUILDARGS
 			} 0 .. $#values
 		}
 	}
-	
+
+	elsif (@_ == 1 and does($_[0], 'HASH') and not ref($_[0]) eq 'HASH')
+	{
+		# help Moo::Object!
+		@_ = +{ %{$_[0]} };
+	}
+
 	my $hashref = $class->SUPER::BUILDARGS(@_);
 	
 #	my %tmp = map { $_ => 1 } keys %$hashref;
@@ -69,10 +75,12 @@ sub BUILDARGS
 sub EXTEND
 {
 	my ($invocant, @args) = @_;
-	my $base = ref($invocant) || $invocant;
+	my $base = $invocant;
+	$base = ref $invocant if ref $invocant;
 	
 	my $processor = 'MooX::Struct::Processor'->new;
-	while (@args and $args[0] =~ /^-(.+)$/) {
+	while (@args) {
+		last unless $args[0] =~ /^-(.+)$/;
 		$processor->flags->{ lc($1) } = !!shift @args;
 	}
 
@@ -98,23 +106,18 @@ sub _data_printer
 	my $self   = shift;
 	
 	my @values = map { scalar &Data::Printer::p(\$_) } @$self;
+	my $label  = Term::ANSIColor::colored($self->TYPE||'struct', 'bright_yellow');
 
 	if (grep /\n/, @values)
 	{
 		return sprintf(
 			"%s[\n\t%s,\n]",
-			Term::ANSIColor::colored($self->TYPE||'struct', 'bright_yellow'),
+			$label,
 			join(qq[,\n\t], map { s/\n/\n\t/gm; $_ } @values),
 		);
 	}
-	else
-	{
-		return sprintf(
-			'%s[ %s ]',
-			Term::ANSIColor::colored($self->TYPE||'struct', 'bright_yellow'),
-			join(q[, ], @values),
-		);
-	}
+	
+	sprintf('%s[ %s ]', $label, join q[, ], @values);
 }
 
 BEGIN {
@@ -183,7 +186,7 @@ BEGIN {
 			$klass = ref($o->[1]) eq 'ARRAY' ? join('::', @{$o->[1]}) : ${$o->[1]};
 			last;
 		}
-		$klass ||= sprintf('%s::__ANON__::%04d', $self->base, ++$counter);
+		$klass = sprintf('%s::__ANON__::%04d', $self->base, ++$counter) unless defined $klass;
 		"Moo"->_set_superclasses($klass, $self->base);
 		"Moo"->_maybe_reset_handlemoose($klass);
 		if ($self->trace)
@@ -386,7 +389,7 @@ BEGIN {
 		my ($self, $subname, $proto) = @_;
 		return sub (;$)
 		{
-			1 if $] < 5.014; # bizarre, but necessary!
+			1; # bizarre, but necessary if $] < 5.014
 			if (ref $proto)  # inflate!
 			{
 				my $opts   = Data::OptList::mkopt($proto);
