@@ -73,7 +73,7 @@ sub EXTEND
 	
 	my $processor = 'MooX::Struct::Processor'->new;
 	while (@args and $args[0] =~ /^-(.+)$/) {
-		$processor->flags->{ lc($1) } = !!shift;
+		$processor->flags->{ lc($1) } = !!shift @args;
 	}
 
 	my $subname = undef;
