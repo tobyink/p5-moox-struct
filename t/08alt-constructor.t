@@ -2,6 +2,12 @@
 
 Check square-bracket-style constructor.
 
+Also checks constructor called with a hashref (works, but not officially
+supported).
+
+Tests that objects overloading both hash and array are considered to be
+hashrefs by the constructor, not arrayrefs.
+
 =head1 AUTHOR
 
 Toby Inkster E<lt>tobyink@cpan.orgE<gt>.

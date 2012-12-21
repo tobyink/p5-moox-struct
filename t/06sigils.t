@@ -4,6 +4,14 @@ Check that the required (C<< ! >>) postfix sigil works, and that the
 scalar ((C<< $ >>), array (C<< @ >>) and hash (C<< % >>) prefix sigils
 work.
 
+Check that the C<< + >> postfix sigil works, that numbers can default to
+values other than zero, and that an explicit C<isa> works.
+
+Make sure that sigils are just hints, and can be overridden by an explicit
+attribute spec.
+
+Checks that attribute specs can be hashrefs or arrayrefs.
+
 =head1 AUTHOR
 
 Toby Inkster E<lt>tobyink@cpan.orgE<gt>.
