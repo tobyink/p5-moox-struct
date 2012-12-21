@@ -97,7 +97,7 @@ sub _data_printer
 	require Term::ANSIColor;
 	my $self   = shift;
 	
-	my @values = map { scalar Data::Printer::p(\$_) } @$self;
+	my @values = map { scalar &Data::Printer::p(\$_) } @$self;
 
 	if (grep /\n/, @values)
 	{
