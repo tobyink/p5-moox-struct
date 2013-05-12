@@ -723,6 +723,22 @@ MooX::Struct overloads stringification and array dereferencing. Objects always
 evaluate to true in a boolean context. (Even if they stringify to the empty
 string.)
 
+=head1 CAVEATS
+
+Because you only get an alias for the struct class, you need to be careful
+with some idioms:
+
+   my $point = Point3D->new(x => 1, y => 2, z => 3);
+   $point->isa("Point3D");   # false!
+   $point->isa( Point3D );   # true
+
+   my %args  = (...);
+   my $class = exists $args{z} ? "Point3D" : "Point";  # wrong!
+   $class->new(%args);
+   
+   my $class = exists $args{z} ?  Point3D  :  Point ;  # right
+   $class->new(%args);
+
 =head1 BUGS
 
 Please report any bugs to
