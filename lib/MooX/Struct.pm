@@ -343,7 +343,7 @@ BEGIN {
 		if ($self->trace)
 		{
 			require Data::Dumper;
-			my $spec_str = "Data::Dumper"->new([$spec])->Terse(1)->Indent(0)->Dump;
+			my $spec_str = "Data::Dumper"->new([$spec])->Terse(1)->Indent(0)->Sortkeys(0)->Dump;
 			$spec_str =~ s/(^\{)|(\}$)//g;
 			$self->trace_handle->printf(
 				"has %s => (%s);\n",
