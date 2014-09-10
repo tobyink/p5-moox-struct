@@ -1,0 +1,12 @@
+@prefix deps:  <http://ontologi.es/doap-deps#> .
+
+<http://purl.org/NET/cpan-uri/dist/MooX-Struct/project>
+	deps:runtime-requirement         [ deps:on "B::Hooks::EndOfScope"^^deps:CpanId ];
+	deps:runtime-requirement         [ deps:on "Data::OptList"^^deps:CpanId ];
+	deps:runtime-requirement         [ deps:on "Moo 1.000000"^^deps:CpanId ];
+	deps:runtime-requirement         [ deps:on "namespace::clean"^^deps:CpanId ];
+	deps:runtime-requirement         [ deps:on "Object::ID"^^deps:CpanId ];
+	deps:runtime-requirement         [ deps:on "Scalar::Does"^^deps:CpanId ];
+	deps:runtime-requirement         [ deps:on "Sub::Install"^^deps:CpanId ];
+	deps:test-requirement            [ deps:on "Test::More 0.61"^^deps:CpanId ].
+
