@@ -25,7 +25,7 @@ use if !eval{ require Data::Printer },
 
 use Test::More;
 
-use Data::Printer colored => 0;
+use Data::Printer colored => 0, return_value => 'dump';
 use MooX::Struct Something => [qw( $foo bar )];
 
 my $obj = Something->new(foo => 1, bar => 2);
