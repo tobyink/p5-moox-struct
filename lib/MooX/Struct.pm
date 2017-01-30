@@ -104,8 +104,8 @@ sub _data_printer
 	require Data::Printer::Filter;
 	require Term::ANSIColor;
 	my $self   = shift;
-	
-	my @values = map { scalar &Data::Printer::p(\$_) } @$self;
+
+	my @values = map { scalar &Data::Printer::p(\$_, return_value => 'dump') } @$self;
 	my $label  = Term::ANSIColor::colored($self->TYPE||'struct', 'bright_yellow');
 
 	if (grep /\n/, @values)

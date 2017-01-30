@@ -29,21 +29,21 @@ use Data::Printer colored => 0;
 use MooX::Struct Something => [qw( $foo bar )];
 
 my $obj = Something->new(foo => 1, bar => 2);
-my $str = p $obj;
+my $str = p($obj, return_value => 'dump');
 
 is($str, 'Something[ 1, 2 ]');
 
 my $ob2 = Something->new(foo => "Hello\nWorld", bar => ["A","B\nC","D"]);
-my $st2 = p $ob2;
+my $st2 = p($ob2, return_value => 'dump');
 like("$st2\n", qr{^Something\[\n}s, 'dump including line breaks');
 
 my $ext = Something->EXTEND('$baz')->new([1, 2, 3]);
-my $pxt = p $ext;
+my $pxt = p($ext, return_value => 'dump');
 
 is($pxt, 'Something[ 1, 2, 3 ]');
 
 my $bas = MooX::Struct->new;
-my $pas = p $bas;
+my $pas = p($bas, return_value => 'dump');
 
 is($pas, 'struct[  ]');
 
