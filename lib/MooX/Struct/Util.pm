@@ -4,6 +4,7 @@ our $AUTHORITY = 'cpan:TOBYINK';
 our $VERSION   = '0.014';
 
 use strict;
+use warnings;
 use Sub::Install qw(install_sub);
 
 sub import
