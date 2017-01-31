@@ -8,3 +8,6 @@ cpan:TOBYINK
 
 cpan:PERIGRIN
 	:name  "Chris Prather".
+
+cpan:HAARG
+	:name  "Graham Knop".

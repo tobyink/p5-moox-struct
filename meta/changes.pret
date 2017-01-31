@@ -108,3 +108,15 @@
 		item "Switch to Dist::Inkt."^^Packaging;
 	].
 
+`MooX-Struct 0.014 cpan:TOBYINK`
+	issued    2017-01-31;
+	changeset [
+		item [
+			a dcs:Bugfix, dcs:Update;
+			label "Work with Data::Printer 0.36.";
+			seealso <https://github.com/tobyink/p5-moox-struct/pull/2>;
+			seealso <https://github.com/tobyink/p5-moox-struct/pull/3>;
+			dcs:thanks cpan:HAARG;
+		];
+	].
+
