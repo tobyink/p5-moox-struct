@@ -20,12 +20,12 @@ the same terms as the Perl 5 programming language system itself.
 use strict;
 use warnings;
 
-use if !eval{ require Data::Printer },
+use if !eval{ require Data::Printer; $Data::Printer::VERSION >= 0.36 },
 	'Test::More', skip_all => 'need Data::Printer';
 
 use Test::More;
 
-use Data::Printer colored => 0;
+use Data::Printer colored => 0, return_value => 'dump';
 use MooX::Struct Something => [qw( $foo bar )];
 
 my $obj = Something->new(foo => 1, bar => 2);
