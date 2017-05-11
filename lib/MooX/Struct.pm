@@ -38,7 +38,7 @@ METHODS: {
 sub BUILDARGS
 {
 	my $class  = shift;
-	my @fields = $class->FIELDS;	
+	my @fields = $class->FIELDS;
 	
 	if (
 		(@_==1 and ref $_[0] eq 'ARRAY') or  # optimized usual case
