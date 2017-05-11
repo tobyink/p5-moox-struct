@@ -120,3 +120,10 @@
 		];
 	].
 
+`MooX-Struct 0.015 cpan:TOBYINK`
+	issued    2017-05-11;
+	changeset [
+		item "Eliminate dependency on Scalar::Does. (Use Type::Tiny instead, which Scalar::Does depended on anyway.)"^^Update;
+		item "Eliminate dependency on Sub::Install. (Use Exporter::Tiny instead, which Scalar::Does depended on anyway.)"^^Update;
+		item "Eliminate dependency on Data::OptList."^^Update;
+	].
