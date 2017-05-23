@@ -127,3 +127,9 @@
 		item "Eliminate dependency on Sub::Install. (Use Exporter::Tiny instead, which Scalar::Does depended on anyway.)"^^Update;
 		item "Eliminate dependency on Data::OptList."^^Update;
 	].
+
+`MooX-Struct 0.016 cpan:TOBYINK`
+	issued    2017-05-23;
+	changeset [
+		item "Remove stray usage of Scalar::Does in test suite."^^Tests;
+	].
