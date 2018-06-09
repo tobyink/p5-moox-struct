@@ -133,3 +133,11 @@
 	changeset [
 		item "Remove stray usage of Scalar::Does in test suite."^^Tests;
 	].
+
+`MooX-Struct 0.017 cpan:TOBYINK`
+	issued    2018-06-09;
+	changeset [
+		item "Better method documentation."^^Documentation;
+		item "CLASSNAME method."^^Addition;
+		item "TYPE_TINY method."^^Addition;
+	].
