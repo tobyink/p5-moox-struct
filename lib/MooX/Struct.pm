@@ -100,20 +100,27 @@ sub EXTEND
 	bless $invocant => $new_class;
 }
 
-# This could do with some improvement from a Data::Printer expert.
-#
 my $done = 0;
 sub _data_printer
 {
-	require Data::Printer::Filter;
-	require Term::ANSIColor;
-	my $self   = shift;
+	my ($self, $ddp) = @_;
 	
-	my @values = map { scalar &Data::Printer::p(\$_, return_value => 'dump') } @$self;
-	my $label  = Term::ANSIColor::colored($self->TYPE||'struct', 'bright_yellow');
-
-	if (grep /\n/, @values)
+	my @values;
+	my $label;
+	
+	if ($Data::Printer::VERSION lt '0.90') {
+		require Data::Printer::Filter;
+		require Term::ANSIColor;
+		@values = map scalar(&Data::Printer::p(\$_, return_value => 'dump')), @$self;
+		$label  = Term::ANSIColor::colored($self->TYPE||'struct', 'bright_yellow');
+	}
+	else
 	{
+		@values = map $ddp->parse(\$_), @$self;
+		$label  = $ddp->maybe_colorize($self->TYPE||'struct', 'MooX::Struct', 'bright_yellow');
+	}	
+
+	if (grep /\n/, @values) {
 		return sprintf(
 			"%s[\n\t%s,\n]",
 			$label,
