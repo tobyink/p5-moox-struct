@@ -12,7 +12,7 @@ BEGIN {
 
 use Moo 1.000;
 use Types::TypeTiny 1.000 qw( HashLike ArrayLike );
-use Types::Standard 1.000 qw( HashRef ArrayRef Num Ref );
+use Types::Standard 1.000 qw( HashRef ArrayRef Num Ref InstanceOf );
 use namespace::autoclean;
 
 my $HashLike  = HashLike  | Ref['HASH'];
@@ -35,7 +35,12 @@ METHODS: {
 	sub TO_STRING   { join q[ ], @{ $_[0]->TO_ARRAY } };
 	sub CLONE       { my $s = shift; ref($s)->new(%{$s->TO_HASH}, @_) };
 	sub CLASSNAME   { ref($_[0]) or $_[0] };
-	sub TYPE_TINY   { Types::Standard::InstanceOf->parameterize(shift->CLASSNAME)->plus_constructors(HashRef|ArrayRef, 'new') };
+	
+	my %_cache;
+	sub TYPE_TINY {
+		my $class = shift->CLASSNAME;
+		$_cache{$class} ||= (InstanceOf[$class])->plus_constructors(HashRef|ArrayRef, 'new');
+	}
 };
 
 sub BUILDARGS
