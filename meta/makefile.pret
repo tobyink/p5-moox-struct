@@ -8,5 +8,6 @@
 	deps:runtime-requirement         [ deps:on "Object::ID"^^deps:CpanId ];
 	deps:runtime-requirement         [ deps:on "Type::Tiny 1.000000"^^deps:CpanId ];
 	deps:runtime-requirement         [ deps:on "Exporter::Tiny 0.044"^^deps:CpanId ];
+	deps:test-requirement            [ deps:on "Moo 1.006000"^^deps:CpanId ];
 	deps:test-requirement            [ deps:on "Test::More 0.61"^^deps:CpanId ].
 
