@@ -7,7 +7,7 @@ use utf8;
 
 BEGIN {
 	$MooX::Struct::AUTHORITY = 'cpan:TOBYINK';
-	$MooX::Struct::VERSION   = '0.018';
+	$MooX::Struct::VERSION   = '0.019';
 }
 
 use Moo 1.000;
@@ -138,7 +138,7 @@ BEGIN {
 	{
 		no warnings;
 		our $AUTHORITY = 'cpan:TOBYINK';
-		our $VERSION   = '0.018';
+		our $VERSION   = '0.019';
 	}
 	
 	sub _uniq { my %seen; grep { not $seen{$_}++ } @_ };
@@ -677,8 +677,8 @@ suitable for a Moose/Moo C<isa>.
    use Moo;
    use MooX::Struct Bar => [qw( $name )];
    
-   has left_bar  => (is => 'rw', isa => Bar->TYPE_TINY);
-   has right_bar => (is => 'rw', isa => Bar->TYPE_TINY);
+   has left_bar  => (is => 'rw', isa => Bar->TYPE_TINY, coerce => 1);
+   has right_bar => (is => 'rw', isa => Bar->TYPE_TINY, coerce => 1);
    
    ...;
  }

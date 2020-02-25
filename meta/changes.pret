@@ -147,3 +147,10 @@
 	changeset [
 		item "Support for Data::Printer 0.99 trial versions."^^Update;
 	].
+
+`MooX-Struct 0.019 cpan:TOBYINK`
+	issued    2020-20-25;
+	changeset [
+		item "Tidy up MooX::Struct namespace using namespace::autoclean."^^Change;
+		item "The TYPE_TINY method now returns a type constraint with a coercion from ArrayRef|HashRef."^^Change;
+	].
