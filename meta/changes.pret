@@ -141,3 +141,9 @@
 		item "CLASSNAME method."^^Addition;
 		item "TYPE_TINY method."^^Addition;
 	].
+
+`MooX-Struct 0.018 cpan:TOBYINK`
+	issued    2020-20-25;
+	changeset [
+		item "Support for Data::Printer 0.99 trial versions."^^Update;
+	].
