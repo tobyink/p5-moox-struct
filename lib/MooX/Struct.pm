@@ -118,7 +118,7 @@ sub _data_printer
 	{
 		@values = map $ddp->parse(\$_), @$self;
 		$label  = $ddp->maybe_colorize($self->TYPE||'struct', 'MooX::Struct', 'bright_yellow');
-	}	
+	}
 
 	if (grep /\n/, @values) {
 		return sprintf(
