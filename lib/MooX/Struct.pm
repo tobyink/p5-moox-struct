@@ -13,8 +13,9 @@ BEGIN {
 use Moo 1.000;
 use Types::TypeTiny 1.000 qw( HashLike ArrayLike );
 use Types::Standard 1.000 qw( HashRef ArrayRef Num Ref );
+use namespace::autoclean;
 
-my $HashLike  = HashLike | Ref['HASH'];
+my $HashLike  = HashLike  | Ref['HASH'];
 my $ArrayLike = ArrayLike | Ref['ARRAY'];
 
 use overload
@@ -34,7 +35,7 @@ METHODS: {
 	sub TO_STRING   { join q[ ], @{ $_[0]->TO_ARRAY } };
 	sub CLONE       { my $s = shift; ref($s)->new(%{$s->TO_HASH}, @_) };
 	sub CLASSNAME   { ref($_[0]) or $_[0] };
-	sub TYPE_TINY   { Types::Standard::InstanceOf->parameterize(shift->CLASSNAME) };
+	sub TYPE_TINY   { Types::Standard::InstanceOf->parameterize(shift->CLASSNAME)->plus_constructors(HashRef|ArrayRef, 'new') };
 };
 
 sub BUILDARGS
@@ -460,7 +461,6 @@ sub import
 	"$class\::Processor"->new->process($caller, @_);
 }
 
-no Moo;
 1;
 
 __END__
