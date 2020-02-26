@@ -154,3 +154,9 @@
 		item "Tidy up MooX::Struct namespace using namespace::autoclean."^^Change;
 		item "The TYPE_TINY method now returns a type constraint with a coercion from ArrayRef|HashRef."^^Change;
 	].
+
+`MooX-Struct 0.020 cpan:TOBYINK`
+	issued    2020-20-26;
+	changeset [
+		item "Require newer namespace::autoclean."^^Packaging;
+	].

@@ -4,7 +4,7 @@
 	deps:runtime-requirement         [ deps:on "perl 5.008"^^deps:CpanId ];
 	deps:runtime-requirement         [ deps:on "B::Hooks::EndOfScope"^^deps:CpanId ];
 	deps:runtime-requirement         [ deps:on "Moo 1.000000"^^deps:CpanId ];
-	deps:runtime-requirement         [ deps:on "namespace::autoclean 0.22"^^deps:CpanId ];
+	deps:runtime-requirement         [ deps:on "namespace::autoclean 0.19"^^deps:CpanId ];
 	deps:runtime-requirement         [ deps:on "Object::ID"^^deps:CpanId ];
 	deps:runtime-requirement         [ deps:on "Type::Tiny 1.000000"^^deps:CpanId ];
 	deps:runtime-requirement         [ deps:on "Exporter::Tiny 0.044"^^deps:CpanId ];
